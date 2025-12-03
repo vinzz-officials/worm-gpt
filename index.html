@@ -1,3 +1,55 @@
-<script>
-navigator.serviceWorker.register("/sc.js");
-</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>𝕬𝕵𝖀𝕯𝕬𝕹 𝖃</title>
+<link rel="icon" href="https://ajudanxgpt.netlify.app/favicon.png" type="image/png">
+  <link rel="stylesheet" href="css/worm.css">
+</head>
+<body>
+
+<div class="chat-wrapper">
+
+    <header class="header">
+        <div class="header-left">
+            <span class="header-action" id="menuBtn">☰</span>
+        </div>
+        <div class="get-plus">✨ Dapatkan Plus</div>
+        <div class="header-right">
+            <span class="header-action" style="font-size: 22px;" onclick="showResetModal()">↻</span>
+        </div>
+    </header>
+
+    <div id="dropdownMenu" class="dropdown-menu">
+        <ul>
+            <li onclick="location.href='load.html?go=index.html'">🏠 Beranda</li>
+            <li onclick="showResetModal()">🗑 Hapus Riwayat</li>
+            <li onclick="location.href='load.html?go=info/worm.html'">📣 Informasi</li>
+        </ul>
+    </div>
+
+    <div class="messages" id="messages">
+        <div class="initial-prompt">Apa yang bisa saya bantu?</div>
+    </div>
+
+    <div class="input-area">
+        <textarea id="prompt" placeholder="Ask WormGPT" onkeypress="handleKeyPress(event)" oninput="autoResize(this)"></textarea>
+        <span class="send-icon" onclick="sendMessage()"><img src="send.png" style="width:100%;"></span>
+    </div>
+
+</div>
+
+<div id="resetModal" class="custom-modal">
+    <div class="modal-content">
+        <h3 style="color:#ff5555; text-shadow:0 0 12px red;">🚨 Hapus Riwayat Chat</h3>
+        <p style="color:#ffcccc">Apakah Anda yakin ingin menghapus riwayat chat ini? Tindakan ini tidak dapat dibatalkan.</p>
+        <div class="modal-buttons">
+            <button class="modal-btn btn-cancel" onclick="hideResetModal()">Batal</button>
+            <button class="modal-btn btn-confirm" onclick="resetChat()">Ya, Hapus</button>
+        </div>
+    </div>
+</div>
+<script src="js/sk.js"></script>
+</body>
+</html>
