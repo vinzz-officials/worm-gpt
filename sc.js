@@ -1,13 +1,16 @@
-self.addEventListener("fetch", async (event) => {
+const UPSTREAM = "https://ajudanxgpt.netlify.app";   // website target
+const LOCAL_OVERRIDE = "/prompt.js";            // file lokal pengganti
+const TARGET_JS_NAME = "js/sk.js";                 // nama js yang mau diganti
+
+self.addEventListener("fetch", event => {
   const url = new URL(event.request.url);
 
-  // File yang mau lu override
-  if (url.pathname.endsWith("/js/sk.js")) {
-    event.respondWith(fetch("/prompt.js"));
+  // Jika request minta JS tertentu → ganti pakai punya kita
+  if (url.pathname.includes(TARGET_JS_NAME)) {
+    event.respondWith(fetch(LOCAL_OVERRIDE));
     return;
   }
 
-  // Semua resource lain tetap ke web asli
-  const upstream = "https://ajudanxgpt.netlify.app";
-  event.respondWith(fetch(upstream + url.pathname));
+  // Selain itu → ambil dari website target
+  event.respondWith(fetch(UPSTREAM + url.pathname));
 });
