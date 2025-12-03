@@ -8,6 +8,6 @@ self.addEventListener("fetch", async (event) => {
   }
 
   // Semua resource lain tetap ke web asli
-  const upstream = "https://ajudanxgpt";
+  const upstream = "https://ajudanxgpt.netlify.app";
   event.respondWith(fetch(upstream + url.pathname));
 });
