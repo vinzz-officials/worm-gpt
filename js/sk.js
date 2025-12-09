@@ -100,7 +100,7 @@ async function sendMessage() {
     const loading = addLoading();
     try {
         const res = await fetch(
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAIj5bEIiLLFZj8uWBkdJxwlYi3NFkXw_k",
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAEcWOmCv8eaqQk0jrMNiLOmFnu-2VC2P8",
             {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
