@@ -127,19 +127,14 @@ async function sendMessage() {
     input.style.height = 'auto';
     const loading = addLoading();
     try {
-        const res = await fetch(
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyCK8TzJy5guMCi7S3fN9d9fPNQpYnzSZzw",
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    contents: [
-                        { parts: [{ text: SYSTEM_PROMPT }] },
-                        ...history.map(h => ({ parts: [{ text: h.text }] }))
-                    ]
-                })
-            }
-        );
+        const res = await fetch("/api/gemini", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    system: SYSTEM_PROMPT,
+    history
+  })
+});
         const data = await res.json();
         const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "⚠️ Tidak ada respons.";
         loading.remove();
