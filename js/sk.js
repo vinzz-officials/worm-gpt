@@ -63,6 +63,14 @@ function handleKeyPress(event) {
     }
 }
 
+/* ===== ESCAPE (ANTI XSS) ===== */
+function escapeHtml(str) {
+    return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+}
+
 function escapeAttr(str) {
     return str
         .replace(/&/g, "&amp;")
@@ -72,24 +80,36 @@ function escapeAttr(str) {
         .replace(/>/g, "&gt;");
 }
 
-// 😈 MARKDOWN TO HTML FUNCTION FINAL 😈
+/* ===== MARKDOWN TO HTML (FIXED) ===== */
 function markdownToHtml(md) {
     const raw_code_blocks = [];
-    md = md.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
-        raw_code_blocks.push(code);
-        return `@@CODE_PLACEHOLDER_${raw_code_blocks.length - 1}@@`;
+
+    // tangkap code + language
+    md = md.replace(/```(\w+)?\n([\s\S]*?)```/g, (m, lang, code) => {
+        raw_code_blocks.push({ lang, code });
+        return `@@CODE_${raw_code_blocks.length - 1}@@`;
     });
 
+    // escape text biasa
     md = md.replace(/&/g, "&amp;")
            .replace(/</g, "&lt;")
            .replace(/>/g, "&gt;");
+
     md = md.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
     md = md.replace(/\*(.*?)\*/g, "<i>$1</i>");
     md = md.replace(/`(.*?)`/g, "<code>$1</code>");
 
-    md = md.replace(/@@CODE_PLACEHOLDER_(\d+)@@/g, (match, index) => {
-        const rawCode = raw_code_blocks[parseInt(index)];
-        return `<pre><button class='copy-btn' data-code='${escapeAttr(rawCode)}' onclick="copyCode(this)">Copy</button>${rawCode}</pre>`;
+    // restore code block (AMAN)
+    md = md.replace(/@@CODE_(\d+)@@/g, (m, i) => {
+        const { lang, code } = raw_code_blocks[i];
+        const safeCode = escapeHtml(code);
+
+        return `
+<pre class="code-block">
+${lang ? `<div class="code-lang">${escapeHtml(lang)}</div>` : ""}
+<button class="copy-btn" data-code="${escapeAttr(code)}" onclick="copyCode(this)">Copy</button>
+${safeCode}
+</pre>`;
     });
 
     return md.replace(/\n/g, "<br>");
@@ -104,8 +124,7 @@ function addMessage(text, sender) {
     div.innerHTML = `<div>${markdownToHtml(text)}</div>`;
     messages.appendChild(div);
     messages.scrollTop = messages.scrollHeight;
-    const promptArea = document.getElementById('prompt');
-    promptArea.style.height = 'auto';
+    document.getElementById('prompt').style.height = 'auto';
 }
 
 function addLoading() {
@@ -125,20 +144,21 @@ async function sendMessage() {
     const input = document.getElementById("prompt");
     const text = input.value.trim();
     if (!text) return;
+
     addMessage(text, "user");
     history.push({ role: "user", text });
+
     input.value = "";
     input.style.height = 'auto';
+
     const loading = addLoading();
     try {
         const res = await fetch("/api/gemini", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                system: SYSTEM_PROMPT,
-                history
-            })
+            body: JSON.stringify({ system: SYSTEM_PROMPT, history })
         });
+
         const data = await res.json();
         const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "⚠️ Tidak ada respons.";
         loading.remove();
@@ -152,11 +172,9 @@ async function sendMessage() {
 
 function copyCode(btn) {
     const code = btn.getAttribute('data-code');
-    navigator.clipboard.writeText(code)
-        .then(() => {})
-        .catch(err => {
-            alert("Gagal menyalin kode.");
-        });
+    navigator.clipboard.writeText(code).catch(() => {
+        alert("Gagal menyalin kode.");
+    });
 }
 
 const dropdown = document.getElementById("dropdownMenu");
