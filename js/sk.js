@@ -99,18 +99,18 @@ function markdownToHtml(md) {
     md = md.replace(/\*(.*?)\*/g, "<i>$1</i>");
     md = md.replace(/`(.*?)`/g, "<code>$1</code>");
 
-    // restore code block (AMAN)
-    md = md.replace(/@@CODE_(\d+)@@/g, (m, i) => {
-        const { lang, code } = raw_code_blocks[i];
-        const safeCode = escapeHtml(code);
+    // restore code block (AMAN & COPY BERSIH)
+md = md.replace(/@@CODE_(\d+)@@/g, (m, i) => {
+    const { lang, code } = raw_code_blocks[i];
+    const safeCode = escapeHtml(code);
 
-        return `
+    return `
 <pre class="code-block">
 ${lang ? `<div class="code-lang">${escapeHtml(lang)}</div>` : ""}
-<button class="copy-btn" data-code="${escapeAttr(code)}" onclick="copyCode(this)">Copy</button>
-${safeCode}
+<button class="copy-btn" onclick="copyCode(this)">Copy</button>
+<code>${safeCode}</code>
 </pre>`;
-    });
+});
 
     return md.replace(/\n/g, "<br>");
 }
@@ -171,10 +171,9 @@ async function sendMessage() {
 }
 
 function copyCode(btn) {
-    const code = btn.getAttribute('data-code');
-    navigator.clipboard.writeText(code).catch(() => {
-        alert("Gagal menyalin kode.");
-    });
+    const pre = btn.closest('pre');
+    const code = pre.querySelector('code').textContent;
+    navigator.clipboard.writeText(code);
 }
 
 const dropdown = document.getElementById("dropdownMenu");
