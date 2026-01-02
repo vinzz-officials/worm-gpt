@@ -84,35 +84,39 @@ function escapeAttr(str) {
 function markdownToHtml(md) {
     const raw_code_blocks = [];
 
-    // tangkap code + language
+    // 1. Tangkap code block dulu
     md = md.replace(/```(\w+)?\n([\s\S]*?)```/g, (m, lang, code) => {
         raw_code_blocks.push({ lang, code });
         return `@@CODE_${raw_code_blocks.length - 1}@@`;
     });
 
-    // escape text biasa
+    // 2. Escape HTML teks biasa
     md = md.replace(/&/g, "&amp;")
            .replace(/</g, "&lt;")
            .replace(/>/g, "&gt;");
 
+    // 3. Markdown basic
     md = md.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
     md = md.replace(/\*(.*?)\*/g, "<i>$1</i>");
     md = md.replace(/`(.*?)`/g, "<code>$1</code>");
 
-    // restore code block (AMAN & COPY BERSIH)
-md = md.replace(/@@CODE_(\d+)@@/g, (m, i) => {
-    const { lang, code } = raw_code_blocks[i];
-    const safeCode = escapeHtml(code);
+    // 4. ⬅️ NEWLINE KE <br> HANYA UNTUK TEKS BIASA
+    md = md.replace(/\n/g, "<br>");
 
-    return `
+    // 5. Restore code block (TIDAK KENA <br>)
+    md = md.replace(/@@CODE_(\d+)@@/g, (m, i) => {
+        const { lang, code } = raw_code_blocks[i];
+        const safeCode = escapeHtml(code);
+
+        return `
 <pre class="code-block">
 ${lang ? `<div class="code-lang">${escapeHtml(lang)}</div>` : ""}
 <button class="copy-btn" onclick="copyCode(this)">Copy</button>
 <code>${safeCode}</code>
 </pre>`;
-});
+    });
 
-    return md.replace(/\n/g, "<br>");
+    return md;
 }
 
 function addMessage(text, sender) {
